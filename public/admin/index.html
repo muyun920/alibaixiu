@@ -90,5 +90,23 @@
   <script src="../assets/vendors/bootstrap/js/bootstrap.js"></script>
   <script>NProgress.done()</script>
   <script src="../assets/js/common.js"></script>
+  <!-- <script>
+      $('#logout').on('click', function() {
+        var isconfirm = confirm('确认退出吗');
+        if(isconfirm) {
+          $.ajax({
+            type: "post",
+            url: "/logout",
+            success: function (response) {
+              location.href ='login.html'
+            },
+            error: function() {
+              console.log('退出失败');
+              
+            }
+          });
+        }
+      })
+  </script> -->
 </body>
 </html>

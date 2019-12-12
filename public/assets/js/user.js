@@ -1,94 +1,136 @@
-// 当表单发生提交行为的时候
-$('#userForm').on('submit', function () {
-	// 获取到用户在表单中输入的内容并将内容格式化成参数字符串
-	var formData = $(this).serialize();
-	// 向服务器端发送添加用户的请求
-	$.ajax({
-		type: 'post',
-		url: '/users',
-		data: formData,
-		success: function () {
-			// 刷新页面
+//用户添加
+$('#userForm').on('submit', function() {
+	var formdata = $(this).serialize();
+    $.ajax({
+		type: "post",
+		url: "/users",
+		data: formdata,
+		// dataType: "dataType",
+		success: function (response) {
 			location.reload();
 		},
-		error: function () {
-			alert('用户添加失败')
+		error: function(err) {
+			var er = JSON.parse(err.responseText);
+			// console.log(er);
+			alert(er.message)
+			
 		}
-	})
-	// 阻止表单的默认提交行为
+	});
 	return false;
 });
-
-// 当用户选择文件的时候
-$('#modifyBox').on('change', '#avatar', function () {
-	// 用户选择到的文件
-	// this.files[0]
+//用户头像上传
+$('#modifyBox').on('change', '#avatar', function() {
 	var formData = new FormData();
-	formData.append('avatar', this.files[0]);
-
+	formData.append('avatar',this.files[0]);
 	$.ajax({
-		type: 'post',
-		url: '/upload',
+		type: "post",
+		url: "/upload",
 		data: formData,
-		// 告诉$.ajax方法不要解析请求参数
-		processData: false,
-		// 告诉$.ajax方法不要设置请求参数的类型
-		contentType: false,
+		// dataType: "dataType",
+		contentType : false,
+		processData : false,
 		success: function (response) {
-			console.log(response)
-			// 实现头像预览功能
-			$('#preview').attr('src', response[0].avatar);
-			$('#hiddenAvatar').val(response[0].avatar)
+			// console.log(response);
+			$('#preview').attr('src' , response[0].avatar);
+			$('#hiddenAvatar').val(response[0].avatar);
+		},
+		error : function () {
+			console.log('错误');
+			
 		}
-	})
-});
+	});
 
-// 向服务器端发送请求 索要用户列表数据
+});
+//获取用户列表
 $.ajax({
-	type: 'get',
-	url: '/users',
+	type: "get",
+	url: "/users",
 	success: function (response) {
-		console.log(response)
-		// 使用模板引擎将数据和HTML字符串进行拼接
-		var html = template('userTpl', { data: response });
-		// 将拼接好的字符串显示在页面中
-		$('#userBox').html(html);
+		// console.log(response);
+		var html = template('userTpl', response);
+		$('#userBox').html(html)
+		
 	}
 });
-
-// 通过事件委托的方式为编辑按钮添加点击事件
-$('#userBox').on('click', '.edit', function () {
-	// 获取被点击用户的id值
+//点击用户编辑
+$('#userBox').on('click', '.edit',function () {
 	var id = $(this).attr('data-id');
-	// 根据id获取用户的详细信息
+	// console.log(id);
 	$.ajax({
-		type: 'get',
-		url : '/users/' + id,
+		type: "get",
+		url: "/users/" + id,
 		success: function (response) {
-			console.log(response)
-			var html = template('modifyTpl', response);
+			// console.log(response);
+			var html =template('modifyTpl', response);
 			$('#modifyBox').html(html);
 		}
-	})
+	});
 });
-
-// 为修改表单添加表单提交事件
-$('#modifyBox').on('submit', '#modifyForm', function () {
-	// 获取用户在表单中输入的内容
-	var formData = $(this).serialize();
-	// 获取要修改的那个用户的id值
+//用户修改提交上传
+$('#modifyBox').on('submit','#modifyForm', function() {
+	var formdata = $(this).serialize();
 	var id = $(this).attr('data-id');
-	// 发送请求 修改用户信息
 	$.ajax({
-		type: 'put',
-		url: '/users/' + id,
-		data: formData,
+		type: "put",
+		url: "/users/" +id,
+		data: formdata,
 		success: function (response) {
-			// 修改用户信息成功 重新加载页面
 			location.reload()
 		}
-	})
+	});
 
-	// 阻止表单默认提交
-	return false;
 });
+//点击删除,删除对应用户信息
+$('#userBox').on('click', '.del' ,function() {
+	var id = $(this).attr('data-id');
+	// console.log(id);
+	if(confirm('确认删除用户?')) {
+		$.ajax({
+			type: "delete",
+			url: "/users/" +id,
+			success: function (response) {
+				//重新加载页面 重新显示用户列表
+				location.reload()
+			}
+		});
+	}
+});
+//获取全选按钮
+var selectall = $('#selectAll');
+selectall.on('click', function() {
+	var status = $(this).prop('checked');
+	$('#userBox').find('input').prop('checked', status);
+});
+//当用户前面的复选框发生变化时
+$('#userBox').on('change', '#userStatus' ,function() {
+	var input = $('#userBox').find('input');
+	if (input.length == input.filter(':checked').length) {
+		// alert('ok')
+		selectall.prop('checked' , true)
+	} else {
+		// alert('no')
+		selectall.prop('checked' , false)
+	}
+})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
